@@ -12,6 +12,11 @@ const userCreateValidation = () => {
       .withMessage("Email is required")
       .isEmail()
       .withMessage("The email must be valid"),
+    body("password")
+      .isString()
+      .withMessage("Password is required")
+      .isLength({ min: 5 })
+      .withMessage("The password must be at least 5 characters long"),
   ];
 };
 
