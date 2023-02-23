@@ -38,13 +38,36 @@ const register = async (req, res) => {
       return;
     }
 
-    
+
     res.status(201).json({
       _id: newUser._id,
       token: generateToken(newUser._id)
     })
 };
 
+const login = async(req, res) => {
+  const {email, password} = req.body
+
+  const user = await User.findOne({email})
+
+  if(!user){
+    res.status(422).json({errors: ["ReactGram account do not exists"]})
+    return
+  }
+
+  if (!(await bcrypt.compare(password, user.password))) {
+    res.status(422).json({ errors: ["Invalid password!"] });
+    return;
+  }
+
+  res.status(200).json({
+    _id: user._id,
+    profileImage: user.profileImage,
+    token: generateToken(user._id),
+  });
+}
+
 module.exports = {
   register,
+  login
 };
