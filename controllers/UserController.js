@@ -80,5 +80,6 @@ const update = async(req, res) => {
 module.exports = {
   register,
   login,
-  getCurrentUser
+  getCurrentUser,
+  update
 };
