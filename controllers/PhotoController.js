@@ -147,10 +147,43 @@ const likePhoto = async (req, res) => {
     .json({ photoId: id, userId: reqUser._id, message: "The photo was liked!" });
 };
 
+const commentPhoto = async (req, res) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+
+  const reqUser = req.user;
+
+  const user = await User.findById(reqUser._id);
+
+  const photo = await Photo.findById(id);
+
+  if (!photo) {
+    res.status(404).json({ errors: ["Photo not found!"] });
+    return;
+  }
+
+  const userComment = {
+    comment,
+    userName: user.name,
+    userImage: user.profileImage,
+    userId: user._id,
+  };
+
+  photo.comments.push(userComment);
+
+  await photo.save();
+
+  res.status(200).json({
+    comment: userComment,
+    message: "Comment successfully added!",
+  });
+};
+
 module.exports = {
   insertPhoto,
   deletePhoto,
   updatePhoto,
+  commentPhoto,
   likePhoto,
   getAllPhotos,
   getPhotoById,

@@ -37,5 +37,9 @@ const photoInsertValidation = () => {
         .withMessage("O nome precisa ter no mínimo 3 caracteres."),
     ];
   };
+
+  const commentValidation = () => {
+    return [body("comment").isString().withMessage("The comment is required")];
+  };
   
-module.exports = { photoInsertValidation, photoUpdateValidation };
+module.exports = { photoInsertValidation, photoUpdateValidation, commentValidation };
