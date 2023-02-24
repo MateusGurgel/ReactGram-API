@@ -40,9 +40,7 @@ const deletePhoto = async (req, res) => {
   }
 
   if (!photo.userId.equals(reqUser._id)) {
-    res
-      .status(422)
-      .json({ errors: ["an error occurred please try again"] });
+    res.status(422).json({ errors: ["an error occurred please try again"] });
     return;
   }
 
@@ -53,7 +51,16 @@ const deletePhoto = async (req, res) => {
     .json({ id: photo._id, message: "Photo successfully deleted" });
 };
 
+const getAllPhotos = async (req, res) => {
+  const photos = await Photo.find({})
+    .sort([["createdAt", -1]])
+    .exec();
+
+  return res.status(200).json(photos);
+};
+
 module.exports = {
   insertPhoto,
   deletePhoto,
+  getAllPhotos,
 };
