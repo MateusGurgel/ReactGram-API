@@ -2,6 +2,7 @@ const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -12,47 +13,45 @@ const generateToken = (id) => {
 };
 
 const register = async (req, res) => {
+  const { name, email, password } = req.body;
 
-    const {name, email, password} = req.body
+  const user = await User.findOne({ email });
 
+  if (user) {
+    res.status(422).json({ errors: ["ReactGram account already exists"] });
+    return;
+  }
 
-    const user = await User.findOne({email})
+  const salt = await bcrypt.genSalt();
+  const passwordHash = await bcrypt.hash(password, salt);
 
-    if(user){
-      res.status(422).json({errors: ["ReactGram account already exists"]})
-      return
-    }
+  const newUser = await User.create({
+    name,
+    email,
+    password: passwordHash,
+  });
 
+  if (!newUser) {
+    res
+      .status(422)
+      .json({ errors: ["An error occurred, please try again later"] });
+    return;
+  }
 
-    const salt = await bcrypt.genSalt()
-    const passwordHash = await bcrypt.hash(password, salt)
-
-    const newUser = await User.create({
-      name,
-      email,
-      password: passwordHash
-    })
-
-    if(!newUser) {    
-      res.status(422).json({errors: ["An error occurred, please try again later"]})
-      return;
-    }
-
-
-    res.status(201).json({
-      _id: newUser._id,
-      token: generateToken(newUser._id)
-    })
+  res.status(201).json({
+    _id: newUser._id,
+    token: generateToken(newUser._id),
+  });
 };
 
-const login = async(req, res) => {
-  const {email, password} = req.body
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-  const user = await User.findOne({email})
+  const user = await User.findOne({ email });
 
-  if(!user){
-    res.status(422).json({errors: ["ReactGram account do not exists"]})
-    return
+  if (!user) {
+    res.status(422).json({ errors: ["ReactGram account do not exists"] });
+    return;
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
@@ -65,7 +64,7 @@ const login = async(req, res) => {
     profileImage: user.profileImage,
     token: generateToken(user._id),
   });
-}
+};
 
 const getCurrentUser = async (req, res) => {
   const user = req.user;
@@ -73,7 +72,7 @@ const getCurrentUser = async (req, res) => {
   res.status(200).json(user);
 };
 
-const update = async(req, res) => {
+const update = async (req, res) => {
   const { name, password, bio } = req.body;
 
   let profileImage = null;
@@ -109,11 +108,29 @@ const update = async(req, res) => {
   await user.save();
 
   res.status(200).json(user);
-}
+};
+
+const getById = async (req, res) => {
+  const { id } = req.params;
+
+
+    const user = await User.findById(mongoose.Types.ObjectId(id)).select(
+    "-password"
+    );
+
+    if (!user){
+      res.status(404).json({ errors: ["Usuário não encontrado!"] });
+      return;
+    }
+  
+
+  res.status(200).json(user);
+};
 
 module.exports = {
   register,
   login,
   getCurrentUser,
-  update
+  update,
+  getById,
 };
