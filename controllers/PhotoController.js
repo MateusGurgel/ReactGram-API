@@ -74,18 +74,57 @@ const getPhotoById = async (req, res) => {
 
   const photo = await Photo.findById(mongoose.Types.ObjectId(id));
 
-  // Check if photo exists
   if (!photo) {
-    res.status(404).json({ errors: ["Foto não encontrada!"] });
+    res.status(404).json({ errors: ["Photo not found!"] });
     return;
   }
 
   res.status(200).json(photo);
 };
 
+const updatePhoto = async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  let image;
+
+  if (req.file) {
+    image = req.file.filename;
+  }
+
+  const reqUser = req.user;
+
+  const photo = await Photo.findById(id);
+
+  if (!photo) {
+    res.status(404).json({ errors: ["Photo not found!"] });
+    return;
+  }
+
+  if (!photo.userId.equals(reqUser._id)) {
+    res
+      .status(422)
+      .json({ errors: ["an error occurred please try again"] });
+    return;
+  }
+
+  if (title) {
+    photo.title = title;
+  }
+
+  if (image) {
+    photo.image = image;
+  }
+
+  await photo.save();
+
+  res.status(200).json({ photo, message: "Photo successfully updated!"});
+};
+
 module.exports = {
   insertPhoto,
   deletePhoto,
+  updatePhoto,
   getAllPhotos,
   getPhotoById,
   getUserPhotos,
