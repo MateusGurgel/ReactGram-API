@@ -4,7 +4,7 @@ const router = express.Router();
 // Controllers
 
 //Middlewares
-
+const { photoInsertValidation } = require("../middlewares/photoValidation")
 // routes
 
 
