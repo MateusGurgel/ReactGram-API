@@ -34,7 +34,7 @@ const register = async (req, res) => {
   if (!newUser) {
     res
       .status(422)
-      .json({ errors: ["An error occurred, please try again later"] });
+      .json({ errors: ["An error occurred please try again"] });
     return;
   }
 
